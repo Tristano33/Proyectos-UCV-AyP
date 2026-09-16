@@ -1,6 +1,12 @@
 {
-  "name": "C++ Environment",
+  "name": "Proyecto C++ con Make",
   "image": "mcr.microsoft.com/devcontainers/cpp:1-debian-12",
+  
+  // Aquí es donde va el fragmento que mencionas
+  "features": {
+    "ghcr.io/jungaretti/features/make:1": {}
+  },
+
   "customizations": {
     "vscode": {
       "extensions": [
