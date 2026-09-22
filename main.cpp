@@ -1,28 +1,24 @@
-#include<iostream>
-#include<fstream>
+#include <iostream>
+#include <fstream>
 #include<cmath>
+d
+// Funciones para convertir caracteres a sus valores enteros correspondientes 
+int obtenerValorNumerico(char c) {
+    if (c >= '1' && c <= '9') return c - '0';
+    switch (c) {
+        case 'T': return 10;
+        case 'J': return 11;
+        case 'Q': return 12;
+        case 'K': return 13;
+        case 'A': return 15;
+        default:  return 0;
+    }
+}
 
-using namespace std;
+int obtenerPaloNumerico(char c) {
+    return c - '0';
+}
 
-
-//Estructuras de las cartas, el valor card tendra el token de caracteres y despues se evaluara y se colocara el palo y valor
-struct Card {
-    char* card;
-    int palo;
-    int valor;
-};
-//Estructura de la mano, un arreglo de mano para tener acceso a la memoria de la mano
-struct Mano {
-    int cantidad;
-    Card* mano; 
-};
-//Estructura del Mazo, con su cantidad respectiva
-struct Mazo {
-    int cantidad;
-    Card* mazo;
-};
-//Enum de los Jokers para identificarlos de forma sencilla cuando toque marcar los tokens de los Jokers
-enum Jokers {
     joker = 1, //+4 en Mult
     joker_alegre = 2, //+8 en Mult si la mano contiene al menos un par
     joker_demente = 3, //+10 en Mult si la mano contiene dos pares
@@ -34,56 +30,73 @@ enum Jokers {
     fibonacci = 9, //Cada As, 2, 3, 5 u 8, que contenga la mano, otorga +2 al Mult
     negativo = 10, //Aumenta la capacidad máxima de comodines en 1
     reflectante = 11, //Otorga un bono fijo de +50 puntos al valor base de la mano
-};
-//Slots de Joker con el mismo principio de los Mazos
-struct Inventario {
-    int capacidad;
-    int cantidad;
-    Jokers* jokers;
-};
-
-
 
 int main(int argc, char* argv[]) {
-    
-    //ruta del archivo .in
-    char* input_file = argv[1];
-    //ruta del archivo .out
-    //char* output_file = argv[2];
-    
-    ifstream input(input_file);
-    //ofstream output(output_file);
-
-    if (!input.is_open()) {
-        cout << "ERROR: Archivo de entrada inexistente \n";
+    // Verificar que se hayan pasado los argumentos requeridos desde la terminal
+    if (argc < 3) {
+        std::cout << "Uso correcto: " << argv[0] << " <archivo_entrada.in> <archivo_salida.out>" << std::endl;
         return 1;
     }
-    /*
-    if (!output.is_open()) {
-        cout << "ERROR: No se pudo crear el archivo de salida \n";
+
+    // Abrir el archivo de entrada dinámicamente desde argv[1]
+    std::ifstream Entrada(argv[1]);
+    if (!Entrada.is_open()) {
+        std::cout << "Error al abrir el archivo de entrada: " << argv[1] << std::endl;
         return 1;
     }
-    */
 
-    //Variable para leer cada valor separado por espacios o enter
-    char token[50];
-    
-    // el operador >> es para saltar de espacio en espacio leyendo cada token
-    while (input >> token) {
+    // Abrir el archivo de salida dinámicamente desde argv[2]
+    std::ofstream archivoSalida(argv[2]);
+    if (!archivoSalida.is_open()) {
+        std::cout << "Error al crear/abrir el archivo de salida: " << argv[2] << std::endl;
+        Entrada.close();
+        return 1;
+    }
 
-        //suma de los valores de los caracteres para determinar su "peso"
-        int sum_ascii = 0;
-        for (int i = 0; token[i] != '\0'; i++ ) {
-            sum_ascii += token[i];
-        }
+    // Abrir el archivo 'partida.sav'
+    std::ofstream archivoSav("partida.sav");
 
-        //Evaluacion, debido a que el valor mas bajo de las cartas es 21, que sumando sus valores ascii por caracter seria 
-        //'2' = 50 y '1' = 49, entonces: 50 + 49 = 99, cuando el valor sea menor de 49 entonces estaremos empezando a leer los Jokers.
-        //Tambien hay que buscar el limite por encima de suma de caracteres ascii para averiguar cuando no se trata de cartas ni de jokers para empezar con las ciegas
-        if (sum_ascii > 99){
-            cout << "Token leído: " << token << "\n";
-        }
-    }   
+    char mazoInicial[52][2];
+    int numeroDeCarta[52];
+    int paloDeCarta[52];
+
+    for (int i = 0; i < 52; i++) {
+        char extractorDeValores[3];
+        Entrada >> extractorDeValores; // Lee el texto como "K1", "71", "24"
+
+        mazoInicial[i][0] = extractorDeValores[0];
+        mazoInicial[i][1] = extractorDeValores[1];
+
+        numeroDeCarta[i] = obtenerValorNumerico(mazoInicial[i][0]);
+        paloDeCarta[i]   = obtenerPaloNumerico(mazoInicial[i][1]);
+    }
+
+    int comodines[5];
+    for (int i = 0; i < 5; i++) {
+        Entrada >> comodines[i];
+    }
+
+
+    int ciegas[5]; // recordatorio que son maximo 5 etapas/jefes
+    int totalCiegas = 0;
+
+    // Lee las ciegas del archivo de entrada
+    while (totalCiegas < 5 && Entrada >> ciegas[totalCiegas]) {
+        totalCiegas++;
+    }
+
+    Entrada.close();
+
+    // -------------------------------------------------------------
+    // AQUÍ IRA LA LÓGICA DE JUEGO (Evaluación de manos, rondas y guardado)
+    // -------------------------------------------------------------
+
+    // Cierre de los archivos de salida al finalizar la ejecución
+    archivoSalida.close();
+    archivoSav.close();
+
+    return 0;
+}
 
     //Se cierra el ifstream de input
     input.close();
