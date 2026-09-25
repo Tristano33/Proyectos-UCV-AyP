@@ -31,6 +31,32 @@ int obtenerPaloNumerico(char c) {
     negativo = 10, //Aumenta la capacidad máxima de comodines en 1
     reflectante = 11, //Otorga un bono fijo de +50 puntos al valor base de la mano
 
+int calcularValorDeLaMano() {
+    int valorTotalDeLaMano = 0;
+    return valorTotalDeLaMano;
+}
+
+int calcularValordelasCartas(int mano[5]) {
+    int valorTotaldelasCartas = 0;
+    for (int i = 0; i < 5; i++) {
+        valorTotaldelasCartas += mano[i];
+    }
+    return valorTotaldelasCartas;
+}
+
+int calcularMultiplicador(int comodines[5]) {
+    int Multiplicador = 1;
+    for (int i = 0; i < 5; i++) {
+        Multiplicador += 0;
+        }
+    }
+    return Multiplicador;
+
+
+int calcularpuntaje(int valordelaMano, int valorTotaldelasCartas, int Multiplicador) {
+    int PuntajeFinal = (valordelaMano + valorTotaldelasCartas) * Multiplicador;
+    return PuntajeFinal;
+        
 int main(int argc, char* argv[]) {
     // Verificar que se hayan pasado los argumentos requeridos desde la terminal
     if (argc < 3) {
