@@ -19,17 +19,19 @@ int obtenerPaloNumerico(char c) {
     return c - '0';
 }
 
-    joker = 1, //+4 en Mult
-    joker_alegre = 2, //+8 en Mult si la mano contiene al menos un par
-    joker_demente = 3, //+10 en Mult si la mano contiene dos pares
-    joker_gracioso = 4, //+10 de Mult si la mano contiene flush
-    joker_habilidoso = 5, //+50 puntos al valor de la mano si tiene al menos un par
-    joker_taimado = 6, //+100 puntos al valor de la mano si tiene dos pares
-    cuatro_dedos = 7, //Los flush y straight pueden hacerse con 4 cartas
-    punno_elevado = 8, //Agrega el valor de la carta menor de la mano al Mult
-    fibonacci = 9, //Cada As, 2, 3, 5 u 8, que contenga la mano, otorga +2 al Mult
-    negativo = 10, //Aumenta la capacidad máxima de comodines en 1
-    reflectante = 11, //Otorga un bono fijo de +50 puntos al valor base de la mano
+bool esFlush(const int manoAJugar_PALOS[5]) {
+    for (int i = 1; i < 5; i++) {
+        if (manoAJugar_PALOS[i] != manoAJugar_PALOS[0]) return false;
+    }
+    return true;
+}
+
+bool esStraight(int manoAJugar_CARTAS[5]) {
+    // Ordenadas de menor a mayor
+    for (int i = 0; i < 4; i++) {
+        if (manoAJugar_CARTAS[i + 1] != manoAJugar_CARTAS[i] + 1) return false;
+    }
+    return true;
 
 int calcularValorDeLaMano() {
     int valorTotalDeLaMano = 0;
@@ -44,13 +46,59 @@ int calcularValordelasCartas(int mano[5]) {
     return valorTotaldelasCartas;
 }
 
-int calcularMultiplicador(int comodines[5]) {
+int calcularMultiplicador(int comodines[5], int manoAJugar_CARTAS[5], bool hayFlush, bool hayDosPares) {
     int Multiplicador = 1;
     for (int i = 0; i < 5; i++) {
-        Multiplicador += 0;
+
+        switch (comodines[i])
+        {
+        case 1: // Joker, +4 en mult
+            Multiplicador += 4;
+            break;
+
+        case 2: // Joker alegre, +8 en mult
+            Multiplicador += 8;
+            break;
+
+        case 3: //  Joker Demente, +10 de mult si la mano tiene 2 pares
+            if (hayDosPares) {
+                Multiplicador += 10;
+            }
+            break;
+
+        case 4: // Joker Gracioso, +10 de Mult si la mano contiene flush
+            if (hayFlush) {
+                Multiplicador += 10;
+            }
+            break;
+
+        case 8: { // Puño Elevado, Agrega el valor de la carta menor de la mano al Mult
+            int cartaMenorDeLaMano = manoAJugar_CARTAS[0];
+            for (int j = 1; j < 5; j++) {
+                if (manoAJugar_CARTAS[j] < cartaMenorDeLaMano) {
+                    cartaMenorDeLaMano = manoAJugar_CARTAS[j];
+                }
+            }
+            Multiplicador += cartaMenorDeLaMano;
+            break;
+        }
+
+        case 9: // Fibonacci, Cada As, 2, 3, 5 u 8, que contenga la mano, otorga +2 al Mult
+            for (int j = 0; j < 5; j++) {
+                if (manoAJugar_CARTAS[j] == 15 || manoAJugar_CARTAS[j] == 2 || 
+                    manoAJugar_CARTAS[j] == 3 || manoAJugar_CARTAS[j] == 5 || 
+                    manoAJugar_CARTAS[j] == 8) {
+                    Multiplicador += 2;
+                }
+            }
+            break;
+
+        default:
+            break;
         }
     }
     return Multiplicador;
+}
 
 
 int calcularpuntaje(int valordelaMano, int valorTotaldelasCartas, int Multiplicador) {
