@@ -154,29 +154,29 @@ int main(int argc, char* argv[]) {
         paloDeCarta[i]   = obtenerPaloNumerico(mazoInicial[i][1]);
     }
 
-    int comodines[5];
+    int comodines[6];
+        if(bool Negativo == false){
+            int comodines[5]=0;}
     for (int i = 0; i < 5; i++) {
         Entrada >> comodines[i];
     }
 
-
-    int ciegas[5]; // recordatorio que son maximo 5 etapas/jefes
+    int mazoSecundario_ROBO__CARTAS[8] = numeroDeCarta[i];
+    int mazoSecundario_ROBO__PALOS[8] = paloDeCarta[i];
+    
+    int ciegas[10]; // 9 posibles iteraciones maximas, se añade un extra por si acaso
     int totalCiegas = 0;
 
     // Lee las ciegas del archivo de entrada
-    while (totalCiegas < 5 && Entrada >> ciegas[totalCiegas]) {
+    while (totalCiegas < 10 && Entrada >> ciegas[totalCiegas]) {
         totalCiegas++;
     }
 
     Entrada.close();
 
-    // -------------------------------------------------------------
-    // AQUÍ IRA LA LÓGICA DE JUEGO (Evaluación de manos, rondas y guardado)
-    // -------------------------------------------------------------
-
-    // Cierre de los archivos de salida al finalizar la ejecución
-    archivoSalida.close();
-    archivoSav.close();
+for(int c=0; int c < ]; c++)
+    Salida.close();
+    PartidaSav.close();
 
     return 0;
 }
