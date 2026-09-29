@@ -134,6 +134,15 @@ int main(int argc, char* argv[]) {
     int numeroDeCarta[52];
     int paloDeCarta[52];
 
+    int mazoSecundario_ROBO__CARTAS[8];
+    int mazoSecundario_ROBO__PALOS[8];
+
+    int manoAJugar_CARTAS[5];
+    int manoAJugar_PALOS[5];
+
+    int pilaDeDescarte_CARTAS[52];
+    int pilaDeDescarte_Palos[52];
+    
     for (int i = 0; i < 52; i++) {
         char extractorDeValores[3];
         Entrada >> extractorDeValores; // Lee el texto como "K1", "71", "24"
