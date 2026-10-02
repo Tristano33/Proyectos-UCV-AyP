@@ -3,35 +3,21 @@
 #include <cmath>
 
 // ================================================================
-//  Proyecto #2 - Calatro: El Juego Oculto
-//  Algoritmos y Programacion - UCV
-//
-//  Restricciones respetadas:
-//   - Solo se incluyen <iostream>, <cmath> y <fstream>.
-//   - No se usa "enum" (palos y tipos de mano son constantes).
-//   - No se declaran punteros ni se usa memoria dinamica.
-//     La unica excepcion es "char* argv[]" del main, que el
-//     enunciado exige para recibir los parametros.
-//   - El mazo, la mano, la jugada y los descartes son arreglos
-//     estaticos.
-// ================================================================
-
-// ================================================================
 //  CONSTANTES
 // ================================================================
 
-// Tamanos
+// Tamaños
 const int TOTAL_CARTAS_MAZO = 52;
 const int CARTAS_POR_JUGADA = 5;
 const int CARTAS_POR_MANO = 8;
-const int TOTAL_COMODINES = 5;
-// Con 52 cartas el maximo de rondas posibles es 9:
-// robo inicial 8 + un refill de 5 por cada ronda previa -> 8 + 5 * 8 = 48 <= 52
-const int MAX_RONDAS = 9;
 
-// Rango del As para la escalera: la tabla le da 15 como valor de
-// carta, pero para formar escalera ocupa el lugar del 14 (A K Q J T)
-const int RANGO_AS = 14;
+const int TOTAL_COMODINES = 5;
+
+const int MAX_COMODINES = 2 * TOTAL_COMODINES;
+
+const int MAX_LINEA_COMODINES = 512;
+
+const int MAX_RONDAS = 9;
 
 // IDs de los comodines
 const int JOKER = 1;
@@ -88,7 +74,7 @@ struct RangoEscalera {
 };
 
 struct Comodines {
-    int ids[TOTAL_COMODINES];
+    int ids[MAX_COMODINES];
     int total;
     int capacidad;
 };
@@ -150,7 +136,7 @@ int obtenerPaloNumerico(char c) {
 }
 
 // ================================================================
-//  CLASE MAZO (arreglo estatico, sin memoria dinamica)
+//  CLASE MAZO 
 // ================================================================
 
 class Mazo {
@@ -186,7 +172,7 @@ public:
 };
 
 // ================================================================
-//  CLASE MANO (arreglo estatico, sin memoria dinamica)
+//  CLASE MANO
 // ================================================================
 
 class Mano {
@@ -234,9 +220,9 @@ Jugada ordenarJugada(Jugada jugada) {
     return jugada;
 }
 
+// El As suma 15 puntos, pero en la escalera ocupa el 14 (T J Q K A).
 int rangoDeCarta(int valor) {
-    if (valor == 15) return RANGO_AS;
-    return valor;
+    return (valor == 15) ? 14 : valor;
 }
 
 // Arma los rangos de la jugada omitiendo la carta en la posicion "omitir".
@@ -273,20 +259,7 @@ bool esConsecutivo(RangoEscalera rango) {
     return true;
 }
 
-// Escalera "rueda" A-2-3-4-5: aqui el As hace de 1.
-// Se remapea el rango del As (14) a 1 y se comprueba la consecutividad.
-bool esRueda(RangoEscalera rango) {
-    RangoEscalera copia = rango;
-    for (int i = 0; i < copia.cantidad; i++) {
-        if (copia.valores[i] == RANGO_AS) copia.valores[i] = 1;
-    }
-    copia = ordenarRango(copia);
-    return esConsecutivo(copia);
-}
-
 // El Royal Flush exige exactamente T J Q K A (rangos 10..14).
-// Se comprueba el rango explicito para no confundirlo con la rueda
-// de color A-2-3-4-5, que tambien contiene un As.
 // Recibe el rango ya ordenado de las 5 cartas.
 bool esRangoReal(RangoEscalera rango) {
     if (rango.cantidad != CARTAS_POR_JUGADA) return false;
@@ -317,12 +290,12 @@ bool esFlush(Jugada jugada, bool cuatroDedos) {
 bool esStraight(Jugada jugada, bool cuatroDedos) {
     if (!cuatroDedos) {
         RangoEscalera rango = ordenarRango(armarRango(jugada, -1));
-        return esConsecutivo(rango) || esRueda(rango);
+        return esConsecutivo(rango);
     }
     // Se prueba cada subconjunto de 4 cartas
     for (int omitir = 0; omitir < CARTAS_POR_JUGADA; omitir++) {
         RangoEscalera rango = ordenarRango(armarRango(jugada, omitir));
-        if (esConsecutivo(rango) || esRueda(rango)) return true;
+        if (esConsecutivo(rango)) return true;
     }
     return false;
 }
@@ -337,7 +310,6 @@ ConteoValores contarValores(Jugada jugada) {
     return conteo;
 }
 
-// "Al menos un par": una mano con trio, poker o full house tambien lo cumple
 bool tieneAlMenosUnPar(ConteoValores conteo) {
     for (int i = 0; i < 16; i++) {
         if (conteo.frecuencias[i] >= 2) return true;
@@ -345,7 +317,6 @@ bool tieneAlMenosUnPar(ConteoValores conteo) {
     return false;
 }
 
-// "Dos pares": exactamente dos valores repetidos dos veces
 bool tieneDosPares(ConteoValores conteo) {
     int pares = 0;
     for (int i = 0; i < 16; i++) {
@@ -357,7 +328,6 @@ bool tieneDosPares(ConteoValores conteo) {
 int evaluarTipoMano(Jugada jugada, bool cuatroDedos) {
     ConteoValores conteo = contarValores(jugada);
 
-    // El Royal Flush exige las 5 cartas: A K Q J T del mismo palo
     bool royalFlush = esFlush(jugada, false) &&
                       esRangoReal(ordenarRango(armarRango(jugada, -1)));
 
@@ -578,18 +548,52 @@ int main(int argc, char* argv[]) {
     }
 
     // ------------------ LECTURA DE COMODINES ------------------
+    
     Comodines comodines;
-    comodines.total = TOTAL_COMODINES;
-    for (int i = 0; i < TOTAL_COMODINES; i++) {
-        entrada >> comodines.ids[i];
+    entrada.ignore(10000, '\n');   // descarta el resto de la linea del mazo
+    char lineaComodines[MAX_LINEA_COMODINES];
+
+    entrada.getline(lineaComodines, MAX_LINEA_COMODINES);
+
+    int totalLeidos = 0;
+
+    int numero = 0;
+
+    bool armandoNumero = false;
+
+    for (int i = 0; lineaComodines[i] != '\0'; i++) {
+
+        char ch = lineaComodines[i];
+
+        if (ch >= '0' && ch <= '9') {
+            numero = numero * 10 + (ch - '0');
+            armandoNumero = true;
+        } else if (armandoNumero) {
+            if (totalLeidos < MAX_COMODINES) comodines.ids[totalLeidos] = numero;
+            totalLeidos++;
+            numero = 0;
+            armandoNumero = false;
+        }
+
     }
-    // El comodin Negativo (10) suma un espacio a la capacidad de
-    // comodines, es decir, cede su lugar a otro comodin. Como la entrada
-    // fija los mismos 5 comodines, este espacio extra no altera el puntaje
-    // de la partida: queda como dato informativo (no-op).
+    if (armandoNumero) {
+        if (totalLeidos < MAX_COMODINES) comodines.ids[totalLeidos] = numero;
+        totalLeidos++;
+    }
+    if (totalLeidos > MAX_COMODINES) totalLeidos = MAX_COMODINES;
+    comodines.total = totalLeidos;
+
+
+    // entrego mas comodines que la capacidad base mas los Negativos, se
+    // amplia la capacidad para no descartar ninguno.
     comodines.capacidad = TOTAL_COMODINES;
     for (int i = 0; i < comodines.total; i++) {
         if (comodines.ids[i] == NEGATIVO) comodines.capacidad++;
+    }
+    if (comodines.total > comodines.capacidad) {
+
+        comodines.capacidad = comodines.total;
+
     }
 
     // ------------------ ROBO INICIAL (8 cartas) ------------------
@@ -600,14 +604,19 @@ int main(int argc, char* argv[]) {
 
     // ------------------ LECTURA DE CIEGAS ------------------
     int ciegas[MAX_RONDAS];
+
     int totalCiegas = 0;
+
     while (totalCiegas < MAX_RONDAS && (entrada >> ciegas[totalCiegas])) {
+
         totalCiegas++;
+
     }
     entrada.close();
 
     // ------------------ PILA DE DESCARTES ------------------
     Carta descartes[TOTAL_CARTAS_MAZO];
+
     int cantDescartes = 0;
 
     // ------------------ RONDAS ------------------
@@ -624,7 +633,9 @@ int main(int argc, char* argv[]) {
         }
 
         ResultadoJugada resultado = seleccionarMejorJugada(mano, comodines);
+
         TipoMano tipo = buscarTipoMano(resultado.valorBase);
+
         bool ciegaSuperada = (resultado.puntaje >= ciegas[ronda]);
 
         // ---------- SALIDA DE LA RONDA ----------

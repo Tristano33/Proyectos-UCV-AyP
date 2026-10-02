@@ -145,8 +145,6 @@ probar_caso royalFlush
 probar_caso pares
 probar_caso cuatroDedos
 probar_caso sinCuatroDedos
-probar_caso rueda
-probar_caso ruedaColor
 probar_caso ciegaEmpate
 probar_caso comodinesRepetidos
 probar_caso flushVariado
@@ -161,6 +159,7 @@ probar_caso joker3
 probar_caso joker6
 probar_caso joker8
 probar_caso joker10
+probar_caso comodinesExtra
 probar_mazo_agotado
 probar_sin_argumentos
 

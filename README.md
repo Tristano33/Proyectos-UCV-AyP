@@ -52,8 +52,6 @@ Casos incluidos:
 - `pares`: mano de dos pares, prueba los comodines 3, 5, 6 y 9.
 - `cuatroDedos`: con el comodin 7 el color se forma con 4 cartas.
 - `sinCuatroDedos`: el mismo mazo sin el comodin 7, ese color ya no cuenta.
-- `rueda`: escalera "rueda" A-2-3-4-5 (el As vale como 1).
-- `ruedaColor`: rueda del mismo palo; debe ser Straight Flush, nunca Royal Flush.
 - `ciegaEmpate`: el puntaje es exactamente igual a la ciega (se supera con >=).
 - `comodinesRepetidos`: cinco comodines iguales apilan su multiplicador.
 - `flushVariado`: color con los comodines 1, 4, 8, 2 y 10.
@@ -68,6 +66,9 @@ Casos incluidos:
 - `joker6`: el comodin Taimado suma 100 al valor de la mano con dos pares.
 - `joker8`: el comodin Puno Elevado suma la carta menor al multiplicador.
 - `joker10`: el comodin Negativo no altera el puntaje (es nulo).
+- `comodinesExtra`: la linea de comodines trae 10 numeros (5 Negativos + 5
+  normales); se leen todos y el puntaje coincide con el caso oficial porque los
+  Negativos son nulos.
 - `mazoAgotado`: 10 ciegas faciles; el mazo alcanza para 9 rondas y luego se agota
   (el ultimo bloque de `partida.sav` deja 4 cartas sin robar).
 - `sinArgumentos`: sin parametros el programa falla y no escribe archivos.
@@ -90,6 +91,5 @@ La bateria de pruebas cubre los 10 tipos de mano de la tabla y los 11 comodines
 5. La partida termina si no se supera la ciega o si el mazo no alcanza para
    completar una jugada de 5 cartas (con 52 cartas caben 9 rondas).
 
-En la escalera el As es alto (A K Q J T) pero tambien puede ser bajo (A 2 3 4 5,
-la "rueda"). El Royal Flush solo se reconoce con los rangos T J Q K A, para no
-confundir una rueda de color con una escalera real.
+En la escalera el As es siempre alto (A K Q J T); no se reconoce la escalera
+"rueda" (A 2 3 4 5). El Royal Flush exige exactamente los rangos T J Q K A.
