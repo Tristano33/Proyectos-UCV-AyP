@@ -2,9 +2,6 @@
 #include <fstream>
 #include <cmath>
 
-// ================================================================
-//  CONSTANTES
-// ================================================================
 
 // Tamaños
 const int TOTAL_CARTAS_MAZO = 52;
@@ -32,9 +29,6 @@ const int FIBONACCI = 9;
 const int NEGATIVO = 10;
 const int REFLECTANTE = 11;
 
-// ================================================================
-//  ESTRUCTURAS
-// ================================================================
 
 struct Carta {
     int valor;
@@ -89,9 +83,6 @@ struct ResultadoJugada {
     int puntaje;
 };
 
-// ================================================================
-//  FUNCIONES BASICAS DE CARTA
-// ================================================================
 
 Carta armarCarta(int valor, int palo) {
     Carta nueva;
@@ -135,9 +126,6 @@ int obtenerPaloNumerico(char c) {
     return c - '0';
 }
 
-// ================================================================
-//  CLASE MAZO 
-// ================================================================
 
 class Mazo {
 private:
@@ -171,10 +159,6 @@ public:
     }
 };
 
-// ================================================================
-//  CLASE MANO
-// ================================================================
-
 class Mano {
 private:
     Carta cartas[CARTAS_POR_MANO];
@@ -201,10 +185,6 @@ public:
         tamano--;
     }
 };
-
-// ================================================================
-//  ORDEN Y RANGOS
-// ================================================================
 
 // Ordena una jugada por valor de carta (menor a mayor), sincronizando palos
 Jugada ordenarJugada(Jugada jugada) {
@@ -268,10 +248,6 @@ bool esRangoReal(RangoEscalera rango) {
     }
     return true;
 }
-
-// ================================================================
-//  TABLA MANO-VALOR
-// ================================================================
 
 // Con Cuatro Dedos (7) el color y la escalera valen con 4 cartas
 bool esFlush(Jugada jugada, bool cuatroDedos) {
@@ -365,10 +341,6 @@ TipoMano buscarTipoMano(int valorBase) {
     return TABLA_MANOS[9];
 }
 
-// ================================================================
-//  VALORES DE LA MANO
-// ================================================================
-
 int sumarValores(Jugada jugada) {
     int suma = 0;
     for (int i = 0; i < CARTAS_POR_JUGADA; i++) suma += jugada.cartas[i].valor;
@@ -390,7 +362,6 @@ bool tieneComodin(Comodines comodines, int id) {
     return false;
 }
 
-// Comodines que suman puntos al valor de la mano: 5, 6 y 11
 int calcularBonusValorMano(Comodines comodines, bool hayPar, bool hayDosPares) {
     int bonus = 0;
     for (int i = 0; i < comodines.total; i++) {
@@ -401,7 +372,6 @@ int calcularBonusValorMano(Comodines comodines, bool hayPar, bool hayDosPares) {
     return bonus;
 }
 
-// Comodines que afectan el multiplicador: 1, 2, 3, 4, 8 y 9
 int calcularMultiplicador(Jugada jugada, Comodines comodines,
                           bool hayFlush, bool hayPar, bool hayDosPares) {
     int multiplicador = 1;
@@ -435,7 +405,6 @@ int calcularPuntaje(int valordelaMano, int totalCartas, int multiplicador) {
     return (valordelaMano + totalCartas) * multiplicador;
 }
 
-// Evalua una jugada de 5 cartas aplicando todos los comodines
 ResultadoJugada evaluarJugada(Jugada jugada, Comodines comodines) {
     ResultadoJugada resultado;
     for (int i = 0; i < CARTAS_POR_JUGADA; i++) resultado.indices[i] = i;
@@ -458,10 +427,6 @@ ResultadoJugada evaluarJugada(Jugada jugada, Comodines comodines) {
                                         resultado.multiplicador);
     return resultado;
 }
-
-// ================================================================
-//  SELECTOR DE LA MEJOR JUGADA (las 56 combinaciones de 8 tomadas de 5 en 5)
-// ================================================================
 
 ResultadoJugada seleccionarMejorJugada(Mano mano, Comodines comodines) {
     ResultadoJugada mejor;
@@ -504,10 +469,6 @@ ResultadoJugada seleccionarMejorJugada(Mano mano, Comodines comodines) {
     return mejor;
 }
 
-// ================================================================
-//  MAIN
-// ================================================================
-
 int main(int argc, char* argv[]) {
     // Los parametros son obligatorios
     if (argc < 3) {
@@ -537,7 +498,6 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    // ------------------ LECTURA DEL MAZO ------------------
     Mazo mazo;
     for (int i = 0; i < TOTAL_CARTAS_MAZO; i++) {
         char ficha[3];
@@ -547,8 +507,6 @@ int main(int argc, char* argv[]) {
         mazo.agregarCarta(nueva);
     }
 
-    // ------------------ LECTURA DE COMODINES ------------------
-    
     Comodines comodines;
     entrada.ignore(10000, '\n');   // descarta el resto de la linea del mazo
     char lineaComodines[MAX_LINEA_COMODINES];
@@ -583,9 +541,6 @@ int main(int argc, char* argv[]) {
     if (totalLeidos > MAX_COMODINES) totalLeidos = MAX_COMODINES;
     comodines.total = totalLeidos;
 
-
-    // entrego mas comodines que la capacidad base mas los Negativos, se
-    // amplia la capacidad para no descartar ninguno.
     comodines.capacidad = TOTAL_COMODINES;
     for (int i = 0; i < comodines.total; i++) {
         if (comodines.ids[i] == NEGATIVO) comodines.capacidad++;
@@ -596,13 +551,10 @@ int main(int argc, char* argv[]) {
 
     }
 
-    // ------------------ ROBO INICIAL (8 cartas) ------------------
-    Mano mano;
     for (int i = 0; i < CARTAS_POR_MANO; i++) {
         if (mazo.haySiguiente()) mano.agregar(mazo.robar());
     }
 
-    // ------------------ LECTURA DE CIEGAS ------------------
     int ciegas[MAX_RONDAS];
 
     int totalCiegas = 0;
@@ -614,19 +566,17 @@ int main(int argc, char* argv[]) {
     }
     entrada.close();
 
-    // ------------------ PILA DE DESCARTES ------------------
     Carta descartes[TOTAL_CARTAS_MAZO];
 
     int cantDescartes = 0;
 
-    // ------------------ RONDAS ------------------
+    
     bool partidaActiva = true;
     bool primeraRonda = true;
     int ronda = 0;
 
     while (partidaActiva && ronda < totalCiegas) {
 
-        // Sin 5 cartas en la mano no se puede completar una jugada
         if (mano.getTamano() < CARTAS_POR_JUGADA) {
             partidaActiva = false;
             break;
@@ -638,7 +588,6 @@ int main(int argc, char* argv[]) {
 
         bool ciegaSuperada = (resultado.puntaje >= ciegas[ronda]);
 
-        // ---------- SALIDA DE LA RONDA ----------
         if (!primeraRonda) archivoSalida << std::endl;
         archivoSalida << resultado.puntaje << std::endl;
         archivoSalida << tipo.nombre << std::endl;
@@ -649,7 +598,6 @@ int main(int argc, char* argv[]) {
         }
         primeraRonda = false;
 
-        // ---------- DESCARTE PERMANENTE DE LAS 5 JUGADAS ----------
         for (int k = 0; k < CARTAS_POR_JUGADA; k++) {
             Carta jugada = mano.getCarta(resultado.indices[k]);
             if (cantDescartes < TOTAL_CARTAS_MAZO) {
@@ -662,8 +610,6 @@ int main(int argc, char* argv[]) {
             mano.quitarEn(resultado.indices[k]);
         }
 
-        // ---------- PERSISTENCIA (partida.sav) ----------
-        // Cada ronda queda separada por un salto de linea
         if (ronda > 0) archivoSav << std::endl;
 
         for (int i = mazo.getIndiceRobo(); i < mazo.getTotal(); i++) {
@@ -692,20 +638,17 @@ int main(int argc, char* argv[]) {
         }
         archivoSav << std::endl;
 
-        // ---------- FIN DE LA RONDA ----------
         ronda++;
 
         if (!ciegaSuperada) {
             // No se supero la ciega del jefe: termina la partida
             partidaActiva = false;
         } else {
-            // Reposicion: 5 cartas nuevas para la mano
             int robadas = 0;
             while (robadas < CARTAS_POR_JUGADA && mazo.haySiguiente()) {
                 mano.agregar(mazo.robar());
                 robadas++;
             }
-            // El mazo se vacio sin poder completar una jugada de 5 cartas
             if (robadas < CARTAS_POR_JUGADA) partidaActiva = false;
         }
     }
